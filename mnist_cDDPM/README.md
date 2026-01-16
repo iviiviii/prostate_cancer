@@ -1,7 +1,20 @@
-# MNIST Conditional DDPM (Row-Shift Artifact Removal)
+# MNIST cDDPM (Row-shift artifact removal)
 
-This directory contains a conditional Denoising Diffusion Probabilistic Model (cDDPM) 
-designed to remove synthetic row-shift artifacts from MNIST images.
+## 목적
+MNIST 이미지에 인위적으로 삽입한 row-shift artifact를 조건 입력(condition)으로 주고, 원본 digit 구조를 유지하면서 artifact를 완화/제거하는 conditional DDPM을 학습한다.
 
-The model takes a corrupted image (with row-wise shift artifacts) as a condition and 
-generates a restored image that preserves the digit structure while reducing artifacts.
+## 폴더 구조
+- `ddpm/`  
+  모델(Conditional UNet), diffusion scheduler, 전처리/유틸 함수 등 핵심 구현
+
+- `scripts_cDDPM0114/`  
+  실행용 entry 스크립트  
+  - `main_cDDPM0114.py`: 학습 실행  
+  - `infer_cDDPM0114.py`: 체크포인트로 샘플 생성 및 평가(MSE, SSIM)
+
+- `runs_cDDPM0114/`  
+  학습/추론 결과 저장  
+  - `train_full200000/`: 학습 체크포인트, 설정, 로그, 중간 샘플
+    - `samples_step*.png`: 학습 중 일정 step마다 sampling한 결과
+  - `train_full200000/infer/model_last/`: 학습 종료 후 최종 체크포인트로 생성한 샘플 및 평가 결과
+

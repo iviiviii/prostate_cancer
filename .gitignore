@@ -1,0 +1,18 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Experiment outputs
+runs/
+temp/
+
+# Local/IDE
+.DS_Store
+.vscode/
+
+# (선택) 큰 결과물 폴더를 더 빼고 싶으면
+mnist_cDDPM/runs_cDDPM0114/train1/
+mnist_cDDPM/runs_cDDPM0114/train2/
+mnist_cDDPM/temp/
+

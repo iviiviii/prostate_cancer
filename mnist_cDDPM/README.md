@@ -1,11 +1,11 @@
 # MNIST cDDPM (Row-shift artifact removal)
 
 ## 목적
-MNIST 이미지에 인위적으로 삽입한 row-shift artifact를 조건 입력(condition)으로 주고, 원본 digit 구조를 유지하면서 artifact를 완화/제거하는 conditional DDPM을 학습한다.
+MNIST 이미지에 row-shift artifact를 조건 입력(condition)으로 주고, 원본 digit 구조를 유지하면서 artifact를 완화/제거하여 복원하는 conditional DDPM을 학습하는 toy setting.
 
 ## 폴더 구조
 - `ddpm/`  
-  모델(Conditional UNet), diffusion scheduler, 전처리/유틸 함수 등 핵심 구현
+  model(Conditional UNet), diffusion scheduler, 전처리/유틸 함수 등 구현
 
 - `scripts_cDDPM0114/`  
   실행용 entry 스크립트  

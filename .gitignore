@@ -1,18 +1,29 @@
-# Python cache
+# ===== Python / IDE =====
 __pycache__/
 *.pyc
 *.pyo
-
-# Experiment outputs
-runs/
-temp/
-
-# Local/IDE
-.DS_Store
 .vscode/
+.DS_Store
 
-# 큰 결과물 폴더
+# (선택) 큰 결과물 폴더를 더 빼고 싶으면
 mnist_cDDPM/runs_cDDPM0114/train1/
 mnist_cDDPM/runs_cDDPM0114/train2/
 mnist_cDDPM/temp/
 
+# ===== MNIST cDDPM: ignore all run outputs by default =====
+mnist_cDDPM/runs_cDDPM0114/train_full200000/**
+
+# --- KEEP only selected artifacts ---
+!mnist_cDDPM/runs_cDDPM0114/train_full200000/model_last.pt
+!mnist_cDDPM/runs_cDDPM0114/train_full200000/config.yaml
+!mnist_cDDPM/runs_cDDPM0114/train_full200000/loss_curve.png
+!mnist_cDDPM/runs_cDDPM0114/train_full200000/samples_step050000.png
+!mnist_cDDPM/runs_cDDPM0114/train_full200000/samples_step100000.png
+!mnist_cDDPM/runs_cDDPM0114/train_full200000/samples_step150000.png
+!mnist_cDDPM/runs_cDDPM0114/train_full200000/samples_step200000.png
+!mnist_cDDPM/runs_cDDPM0114/train_full200000/train_log.csv
+
+# keep inference results folder (ONLY this subfolder)
+!mnist_cDDPM/runs_cDDPM0114/train_full200000/infer/
+!mnist_cDDPM/runs_cDDPM0114/train_full200000/infer/model_last/
+!mnist_cDDPM/runs_cDDPM0114/train_full200000/infer/model_last/**

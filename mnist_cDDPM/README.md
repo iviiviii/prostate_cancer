@@ -5,7 +5,7 @@ MNIST 이미지에 row-shift artifact를 조건 입력(condition)으로 주고, 
 
 ## 폴더 구조
 - `ddpm/`  
-  model(Conditional UNet), diffusion scheduler, 전처리/유틸 함수 등 구현
+  model.py(Conditional UNet), scheduler.py, train.py, utils.py (horizontal shift artifact, 전처리 등), viz.py (시각화), preprocessing.py 구현
 
 - `scripts_cDDPM0114/`  
   실행용 entry 스크립트  

@@ -1,0 +1,6 @@
+Checkpoint: runs_cDDPM0114/train_full200000/ckpt_step140000.pt
+Split: test
+MSE: 0.081851
+SSIM: 0.811919
+Num Samples: 9984
+Min SSIM: 0.268988

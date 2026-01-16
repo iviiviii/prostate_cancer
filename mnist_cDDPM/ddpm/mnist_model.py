@@ -11,7 +11,6 @@ import torch.nn.functional as F
 
 class SinusoidalPosEmb(nn.Module):
     """Standard sinusoidal timestep embedding."""
-
     def __init__(self, dim: int):
         super().__init__()
         self.dim = dim
@@ -26,11 +25,6 @@ class SinusoidalPosEmb(nn.Module):
 
 
 class ResidualBlock(nn.Module):
-    """GN + SiLU residual block with time embedding injection.
-    groups: GroupNorm에서 채널을 몇 개의 그룹으로 나눠 정규화할지 결정하는 값
-    3채널처럼 8로 안 나눠지면 gcd(3,8)=1이라 1그룹(채널 전체를 한 그룹)으로 동작
-    """
-
     def __init__(self, in_channels: int, out_channels: int, time_dim: int, groups: int = 8):
         super().__init__()
         self.block1 = nn.Sequential(
@@ -55,7 +49,6 @@ class ResidualBlock(nn.Module):
 
 class Down(nn.Module):
     """Stride-2 conv downsample."""
-
     def __init__(self, channels: int):
         super().__init__()
         self.down = nn.Conv2d(channels, channels, 3, stride=2, padding=1)
@@ -66,7 +59,6 @@ class Down(nn.Module):
 
 class Up(nn.Module):
     """Nearest-neighbor upsample + conv."""
-
     def __init__(self, in_channels: int, out_channels: int):
         super().__init__()
         self.up = nn.Sequential(
@@ -80,7 +72,6 @@ class Up(nn.Module):
 
 class ConditionalUNet(nn.Module):
     """Small U-Net with 2 downs/ups. Input: cat([x_t, cond], dim=1)."""
-
     def __init__(self, in_channels: int = 2, base_channels: int = 64, time_dim: int = 128, out_channels: int = 1):
         super().__init__()
         b = base_channels

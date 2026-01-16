@@ -21,26 +21,19 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision.datasets import MNIST
 from torchvision import transforms
 
-
-# ----------------------------
-# Repro / normalization
-# ----------------------------
 def set_seed(seed: int) -> None:
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
-
 def to_ddpm_range(x01: torch.Tensor) -> torch.Tensor:
     """[0,1] -> [-1,1]"""
     return x01 * 2.0 - 1.0
 
-
 def to_01_range(x11: torch.Tensor) -> torch.Tensor:
     """[-1,1] -> [0,1]"""
     return x11.add(1.0).mul(0.5).clamp(0.0, 1.0)
-
 
 # ----------------------------
 # Row-wise shift augmentation
@@ -54,8 +47,8 @@ def _sample_row_offsets(h: int, max_shift_px: int, generator: Optional[torch.Gen
 
 
 def apply_row_shift_no_smooth(
-    img: torch.Tensor,  # (C,H,W) in [0,1]
-    offsets_px: torch.Tensor,  # (H,) integer px
+    img: torch.Tensor,  
+    offsets_px: torch.Tensor,  
     padding_mode: str = "zeros",
     align_corners: bool = True,
 ) -> torch.Tensor:
@@ -70,7 +63,7 @@ def apply_row_shift_no_smooth(
 
     grid_x_norm = 2.0 * grid_x / max(1, (W - 1)) - 1.0
     grid_y_norm = 2.0 * grid_y / max(1, (H - 1)) - 1.0
-    grid = torch.stack([grid_x_norm, grid_y_norm], dim=-1)  # (H,W,2)
+    grid = torch.stack([grid_x_norm, grid_y_norm], dim=-1) 
 
     shifted = F.grid_sample(
         img.unsqueeze(0),
@@ -82,9 +75,6 @@ def apply_row_shift_no_smooth(
     return shifted.squeeze(0)
 
 
-# ----------------------------
-# Dataset
-# ----------------------------
 class RowShiftMNIST(Dataset):
     """Returns (cond, target) where
     - target: clean MNIST in [-1,1]
@@ -124,15 +114,14 @@ class RowShiftMNIST(Dataset):
             if num_samples is not None:
                 indices = indices[: int(num_samples)]
 
-        # seed per sample -> deterministic offsets per index
         self.offset_seeds = rng.integers(low=0, high=2**31 - 1, size=len(indices), dtype=np.int64)
-        self.data = [ds[int(i)] for i in indices]  # list of (PIL->Tensor, label)
+        self.data = [ds[int(i)] for i in indices]  
 
     def __len__(self) -> int:
         return len(self.data)
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
-        img01, _ = self.data[idx]  # (1,28,28) in [0,1]
+        img01, _ = self.data[idx] 
 
         g = torch.Generator()
         g.manual_seed(int(self.offset_seeds[idx]))
@@ -204,12 +193,7 @@ def build_threeway_dataloaders(
     use_mnist_split: str = "train",
     no_split: bool = False,
 ) -> tuple[Optional[DataLoader], Optional[DataLoader], Optional[DataLoader]]:
-    """Create train/val/test dataloaders from MNIST.
 
-    - If no_split=True: returns a single loader covering the whole chosen MNIST split
-      (train -> train_loader, test -> test_loader), val=None, the other None. ratios are ignored.
-    - Otherwise: splits according to ratios; zero-sized splits return None.
-    """
     dummy_ds = MNIST(
         root=str(mnist_root),
         train=(use_mnist_split == "train"),

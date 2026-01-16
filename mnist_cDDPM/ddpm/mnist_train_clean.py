@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""Training loop for conditional DDPM on MNIST row-shift artifacts."""
 
 from __future__ import annotations
 
@@ -143,12 +142,12 @@ def train(args) -> None:
 
         if (step % args.sample_every == 0) or (step == args.train_steps):
 
-            model.eval() # 학습을 멈추고 모델을 잠깐 평가 모드로 전환
+            model.eval() 
             with torch.no_grad():
                 n = min(args.num_sample_save, B)
                 cond_vis = cond[:n]
                 x0_vis = x0[:n]
-                pred = sched.sample(model, cond_vis, device=device) # 노이즈에서 시작해서 이미지를 sampling 함
+                pred = sched.sample(model, cond_vis, device=device) 
             save_triplet_grid(cond_vis, pred, x0_vis, args.output_dir / f"samples_step{step:06d}.png", max_rows=min(6, n))
             save_pair_grid(pred, x0_vis, args.output_dir / f"pred_vs_gt_step{step:06d}.png", nrow=min(4, n))
             model.train()
@@ -158,11 +157,10 @@ def train(args) -> None:
 
     _save_ckpt(args.train_steps, "model_last.pt")
     print(f"[done] saved checkpoint to {args.output_dir / 'model_last.pt'}, final_loss={last_loss:.6f}")
-    # record final loss in log
+
     with open(csv_path, "a", encoding="utf-8") as f:
         f.write(f"final,{last_loss:.6f}\n")
 
-    # loss curve plot
     if len(loss_hist) > 0:
         plt.figure()
         plt.plot(step_hist, loss_hist)
@@ -173,13 +171,4 @@ def train(args) -> None:
         plt.tight_layout()
         plt.savefig(args.output_dir / "loss_curve.png", dpi=300)
         plt.close()
-
-
-# def main():
-#     parser = get_arg_parser()
-#     args = parser.parse_args()
-#     train(args)
-
-
-# if __name__ == "__main__":
-#     main()
+        

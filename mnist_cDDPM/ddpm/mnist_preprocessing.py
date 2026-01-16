@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""Optional: precompute (cond, target) tensors for MNIST row-shift artifacts."""
 
 from __future__ import annotations
 

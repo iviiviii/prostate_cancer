@@ -61,11 +61,10 @@ def parse_args():
 def load_model_and_sched(ckpt_path: Path, device: torch.device):
     """Loads model and scheduler from checkpoint."""
     print(f"[Info] Loading checkpoint from {ckpt_path}...")
-    # weights_only=False는 이전 코드와의 호환성을 위해 유지 (보안 경고 무시)
+
     ckpt = torch.load(str(ckpt_path), map_location=device, weights_only=False)
     args = ckpt.get("args", {})
     
-    # Initialize Model
     model = ConditionalUNet(
         in_channels=2,
         base_channels=args.get("base_channels", 64),
@@ -75,7 +74,6 @@ def load_model_and_sched(ckpt_path: Path, device: torch.device):
     model.load_state_dict(ckpt["model"])
     model.eval()
 
-    # Initialize Scheduler
     diff = ckpt.get("diffusion", {})
     sched = NoiseScheduler(
         num_steps=diff.get("num_steps", 1000),
@@ -144,10 +142,10 @@ def run_metrics(args, model, sched, loader, device, out_dir, *, ckpt_path: str):
     max_ssim = -float("inf")
 
     worst_triplet = None # (cond, pred, target) all in [-1,1]
-    best_triplet = None  # (cond, pred, target) all in [-1,1]
+    best_triplet = None  
     
     worst_map = None # np.ndarray (H,W)
-    best_map = None # np.ndarray (H,W)
+    best_map = None 
 
     ssim_list = []
 
@@ -171,10 +169,7 @@ def run_metrics(args, model, sched, loader, device, out_dir, *, ckpt_path: str):
         t01 = to_01_range(x0).cpu().numpy()
         
         # SSIM is computed per image
-        # IMPORTANT:
-        # - SSIM은 p01/t01로 계산
-        # - worst 저장은 "원본 텐서(-1~1)"로 저장해야
-        #   save_triplet_grid에서 to_01_range가 1번만 적용되어 회색 배경(더블 스케일링) 문제가 없음
+        # save_triplet_grid에서 to_01_range가 1번만 적용되어 회색 배경(더블 스케일링) 문제가 없음
         bs = pred_cpu.shape[0]
         for i in range(bs):
             val, s_map = ssim(t01[i].squeeze(), p01[i].squeeze(), data_range=1.0, full=True) # SSIM map 반환
@@ -185,7 +180,6 @@ def run_metrics(args, model, sched, loader, device, out_dir, *, ckpt_path: str):
             # worst
             if val < min_ssim:
                 min_ssim = val
-                # ✅ worst 저장은 원본 텐서(-1~1)로 저장 (더블 스케일링 방지)
                 worst_triplet = (
                     cond_cpu[i : i + 1],  # (1,1,28,28)
                     x0_cpu[i : i + 1],    # target in [-1,1]
@@ -217,19 +211,17 @@ def run_metrics(args, model, sched, loader, device, out_dir, *, ckpt_path: str):
         f.write(f"Min SSIM: {min_ssim:.6f}\n")
         f.write(f"Max SSIM: {max_ssim:.6f}\n")
     
-    # worst 이미지 저장
+    # worst/best 이미지 저장
     if worst_triplet is not None:
         worst_path = out_dir / f"worst_ssim_{args.use_mnist_split}.png"
-        # worst_triplet = (cond, pred, target) in [-1,1]
-        c, p, t = worst_triplet
+        c, p, t = worst_triplet # worst_triplet = (cond, pred, target) in [-1,1]
         save_triplet_grid(c, p, t, worst_path, max_rows=1)
         print(f"[Info] Worst SSIM={min_ssim:.6f} saved to {worst_path}")
-
         if args.save_ssim_map and (worst_map is not None):
             worst_map_path = out_dir / f"worst_ssim_map_{args.use_mnist_split}.png"
             _save_ssim_map_png(worst_map, worst_map_path, title=f"Worst SSIM map ({min_ssim:.4f})")
             print(f"[Info] Worst SSIM map saved to {worst_map_path}")
-    # best 이미지 저장
+
     if best_triplet is not None:
         best_path = out_dir / f"best_ssim_{args.use_mnist_split}.png"
         c, p, t = best_triplet
@@ -280,7 +272,6 @@ def main():
 
     ckpts = args.ckpt_paths if args.ckpt_paths is not None else [args.ckpt_path]
 
-    # Prepare Data (shared loaders): use entire chosen MNIST split
     ratios = (1.0, 0.0, 0.0)
     train_loader, val_loader, test_loader = build_threeway_dataloaders(
         mnist_root=args.mnist_root,
@@ -290,13 +281,12 @@ def main():
         num_samples=args.num_samples,
         max_shift_px=args.max_shift_px,
         padding_mode=args.padding_mode,
-        seed=42, # Evaluation seed should be fixed
+        seed=42,
         num_workers=args.num_workers,
         use_mnist_split=args.use_mnist_split,
-        no_split=True,  # full split without further subdivision
+        no_split=True,  
     )
     
-    # Select Loader based on argument
     if args.use_mnist_split == "train":
         loader = train_loader
     elif args.use_mnist_split == "val":
@@ -309,7 +299,6 @@ def main():
         sys.exit(1)
 
     for ckpt_path in ckpts:
-        # Setup Output Directory per ckpt
         out_dir = args.output_dir
         if out_dir is None:
             out_dir = ckpt_path.parent / "eval_results"
@@ -317,10 +306,8 @@ def main():
             out_dir = out_dir / ckpt_path.stem
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        # Load Model
         model, sched = load_model_and_sched(ckpt_path, device)
 
-        # Dispatch based on mode
         if args.mode == "sample":
             run_sampling(args, model, sched, loader, device, out_dir)
         elif args.mode == "metrics":

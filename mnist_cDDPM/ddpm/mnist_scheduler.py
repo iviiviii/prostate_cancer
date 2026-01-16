@@ -26,14 +26,12 @@ class NoiseScheduler:
         self.posterior_log_variance_clipped = torch.log(torch.clamp(self.posterior_variance, min=1e-20))
 
     def q_sample(self, x0: torch.Tensor, t: torch.Tensor, noise: torch.Tensor) -> torch.Tensor:
-        """Forward diffusion q(x_t | x_0)."""
         device = x0.device
         sqrt_ab = self.sqrt_alpha_bar.to(device).gather(0, t).view(-1, 1, 1, 1)
         sqrt_omab = self.sqrt_one_minus_alpha_bar.to(device).gather(0, t).view(-1, 1, 1, 1)
         return sqrt_ab * x0 + sqrt_omab * noise
 
     def predict_x0(self, xt: torch.Tensor, eps: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
-        """x0 estimate from x_t and predicted noise."""
         device = xt.device
         sqrt_ab = self.sqrt_alpha_bar.to(device).gather(0, t).view(-1, 1, 1, 1)
         sqrt_omab = self.sqrt_one_minus_alpha_bar.to(device).gather(0, t).view(-1, 1, 1, 1)
@@ -47,7 +45,6 @@ class NoiseScheduler:
         t: torch.Tensor,
         clip_denoised: bool = True,
     ) -> torch.Tensor:
-        """Single reverse diffusion step."""
         device = xt.device
         betas = self.betas.to(device).gather(0, t).view(-1, 1, 1, 1)
         alphas = self.alphas.to(device).gather(0, t).view(-1, 1, 1, 1)
@@ -72,7 +69,6 @@ class NoiseScheduler:
 
     @torch.no_grad()
     def sample(self, model: torch.nn.Module, cond: torch.Tensor, device: torch.device) -> torch.Tensor:
-        """Sample x0 given cond by running reverse process (DDPM ancestral)."""
         model.eval()
         x = torch.randn_like(cond, device=device)
         for t_step in reversed(range(self.num_steps)):

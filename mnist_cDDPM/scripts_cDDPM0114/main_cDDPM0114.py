@@ -14,12 +14,10 @@ python -m scripts_cDDPM0114.main_cDDPM0114 \
 from __future__ import annotations
 from ddpm.mnist_train import get_arg_parser, train
 
-
 def main():
     parser = get_arg_parser()
     args = parser.parse_args()
     train(args)
-
 
 if __name__ == "__main__":
     main()

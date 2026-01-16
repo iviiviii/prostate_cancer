@@ -1,11 +1,7 @@
-# MNIST artifact demo
+# MNIST Conditional DDPM (Row-Shift Artifact Removal)
 
-This folder contains a small demo to run the existing DDPM artifact pipeline on MNIST.
+This directory contains a conditional Denoising Diffusion Probabilistic Model (cDDPM) 
+designed to remove synthetic row-shift artifacts from MNIST images.
 
-- `main_art_mnist.py` : main training script. Example:
-
-```bash
-python mnist_artifact/main_art_mnist.py --output-dir mnist_artifact/runs/test_run --num-train-images 16 --image-size 64 --train-steps 2000
-```
-
-The script reuses the `ddpm` package in the parent directory and writes results to `--output-dir`.
+The model takes a corrupted image (with row-wise shift artifacts) as a condition and 
+generates a restored image that preserves the digit structure while reducing artifacts.
